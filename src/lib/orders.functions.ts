@@ -634,7 +634,7 @@ export const editOrderItems = createServerFn({ method: "POST" })
     return v;
   })
   .handler(async ({ data }): Promise<
-    | { ok: true; stock_updated: boolean }
+    | { ok: true; stock_updated: boolean; subtotal: number; discount: number }
     | { ok: false; error: "insufficient_stock"; shortages: OrderItem[] }
   > => {
     const { requirePermission } = await import("@/lib/session-guard.server");
@@ -728,5 +728,5 @@ export const editOrderItems = createServerFn({ method: "POST" })
     const patch: Record<string, unknown> = { discount_amount: discount };
     if (keptOfferIds) patch.applied_offer_ids = keptOfferIds;
     await admin.from("orders").update(patch).eq("id", data.id).eq("merchant_id", merchantId);
-    return { ok: true, stock_updated: Boolean(r.stock_updated) };
+    return { ok: true, stock_updated: Boolean(r.stock_updated), subtotal, discount };
   });

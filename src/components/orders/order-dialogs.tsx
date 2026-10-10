@@ -204,6 +204,7 @@ export function EditOrderDialog({ order, onClose }: { order: OrderRow | null; on
   const mut = useMutation({
     mutationFn: async () => {
       let stockUpdated = false;
+      let total = Number(f.total) || 0;
       if (linesDirty) {
         const r = await editOrderItems({
           data: {
@@ -219,11 +220,14 @@ export function EditOrderDialog({ order, onClose }: { order: OrderRow | null; on
             .map((s) => [s.product_name, s.color, s.size].filter(Boolean).join(" - ")).join("، "));
         }
         stockUpdated = r.stock_updated;
+        // The server re-priced the discount for the new products; the preview
+        // here only knew the OLD discount, so never let it overwrite the total.
+        total = Math.max(0, Math.round((r.subtotal - r.discount + (Number(f.shipping) || 0)) * 100) / 100);
       }
       await updateOrderDetails({
         data: {
           id: order!.id, customer_name: f.name, customer_phone: f.phone, customer_address: f.address,
-          notes: f.notes, shipping_cost: Number(f.shipping) || 0, total_price: Number(f.total) || 0,
+          notes: f.notes, shipping_cost: Number(f.shipping) || 0, total_price: total,
         },
       });
       return stockUpdated;
