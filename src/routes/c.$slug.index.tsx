@@ -5,6 +5,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { QtyInput } from "@/components/ui/qty-input";
+import { StorefrontChatLink } from "@/components/customer/storefront-chat-link";
 import { ShoppingBag, ShoppingCart, X, Send, Info, Truck, PhoneCall, ScrollText, MessageSquare, UserCircle2, Flame, Tag, ShieldCheck, Phone, ChevronLeft } from "lucide-react";
 import { bestOfferPlan, type OfferPlan } from "@/lib/product-offer-badge";
 import {
@@ -164,14 +165,7 @@ function BrandPageInner({ slug }: { slug: string }) {
         </div>
       </div>
 
-      <Link
-        to="/chat/$slug" params={{ slug }} search={{ mode: "continue" }}
-        aria-label={t("تواصل معنا")}
-        className="store-chat-fab"
-      >
-        <span className="store-chat-fab-ring" aria-hidden />
-        <MessageSquare className="relative h-6 w-6" strokeWidth={1.75} />
-      </Link>
+      <StorefrontChatLink slug={slug} merchantId={store.merchantId} />
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3 sm:px-8">
           <nav className="hidden items-center gap-6 sm:flex">
