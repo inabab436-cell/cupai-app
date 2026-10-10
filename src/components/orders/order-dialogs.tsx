@@ -16,6 +16,9 @@ import {
 
 const fieldCls = "w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
 
+const unitOf = (p?: { price: number | null; sale_price?: number | null }) =>
+  Number(p?.sale_price ?? p?.price ?? 0) || 0;
+
 type Line = { product_id: string; variant: string; quantity: number };
 
 export function NewOrderDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
@@ -38,7 +41,7 @@ export function NewOrderDialog({ open, onOpenChange }: { open: boolean; onOpenCh
 
   const products = cat.data ?? [];
   const byId = new Map(products.map((p) => [p.id, p]));
-  const subtotal = lines.reduce((n, l) => n + Number(byId.get(l.product_id)?.price ?? 0) * l.quantity, 0);
+  const subtotal = lines.reduce((n, l) => n + unitOf(byId.get(l.product_id)) * l.quantity, 0);
   const total = subtotal + (Number(shipping) || 0);
 
   const mut = useMutation({
@@ -93,7 +96,7 @@ export function NewOrderDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                     onChange={(e) => setLine(i, { product_id: e.target.value, variant: "" })}>
                     <option value="">{cat.isLoading ? "جاري التحميل..." : "اختر منتجاً"}</option>
                     {products.map((pp) => (
-                      <option key={pp.id} value={pp.id}>{pp.name}{pp.price != null ? ` — ${pp.price} ${pp.currency ?? ""}` : ""}</option>
+                      <option key={pp.id} value={pp.id}>{pp.name}{pp.price != null ? ` — ${pp.sale_price != null ? `${pp.sale_price} بدل ${pp.price}` : pp.price} ${pp.currency ?? ""}` : ""}</option>
                     ))}
                   </select>
                   {p && p.variants.length > 0 && (
@@ -189,10 +192,10 @@ export function EditOrderDialog({ order, onClose }: { order: OrderRow | null; on
     }));
   }, [order, cat.data]);
 
-  const subtotal = lines.reduce((n, l) => n + Number(byId.get(l.product_id)?.price ?? 0) * l.quantity, 0);
+  const subtotal = lines.reduce((n, l) => n + unitOf(byId.get(l.product_id)) * l.quantity, 0);
   useEffect(() => {
     if (!linesDirty) return;
-    const t = Math.max(0, Math.round((subtotal - discount + (Number(f.shipping) || 0)) * 100) / 100);
+    const t = Math.max(0, Math.round((subtotal + (Number(f.shipping) || 0)) * 100) / 100);
     setF((x) => ({ ...x, total: String(t) }));
   }, [linesDirty, subtotal, f.shipping, discount]);
 
@@ -273,7 +276,7 @@ export function EditOrderDialog({ order, onClose }: { order: OrderRow | null; on
                     onChange={(e) => setLine(i, { product_id: e.target.value, variant: "" })}>
                     <option value="">اختر منتجاً</option>
                     {products.map((pp) => (
-                      <option key={pp.id} value={pp.id}>{pp.name}{pp.price != null ? ` — ${pp.price} ${pp.currency ?? ""}` : ""}</option>
+                      <option key={pp.id} value={pp.id}>{pp.name}{pp.price != null ? ` — ${pp.sale_price != null ? `${pp.sale_price} بدل ${pp.price}` : pp.price} ${pp.currency ?? ""}` : ""}</option>
                     ))}
                   </select>
                   {p && p.variants.length > 0 && (

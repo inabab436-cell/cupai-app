@@ -406,10 +406,29 @@ export const listOrderCatalog = createServerFn({ method: "GET" }).handler(
     const { data: vars } = ids.length
       ? await admin.from("product_variants").select("product_id, color, size, stock").in("product_id", ids)
       : { data: [] as any[] };
+    // Live per-piece product offers → price after discount (display only; the
+    // server re-prices every order through the offer engine).
+    const { PIECE_OFFER_MARKER } = await import("@/lib/offers.server");
+    const { data: offs } = ids.length
+      ? await admin.from("offers").select("product_id, discount_type, discount_value")
+          .eq("user_id", userId).eq("description", PIECE_OFFER_MARKER).eq("is_active", true)
+          .order("created_at", { ascending: false })
+      : { data: [] as any[] };
+    const offerBy = new Map<string, any>();
+    for (const o of (offs ?? []) as any[]) if (o.product_id && !offerBy.has(String(o.product_id))) offerBy.set(String(o.product_id), o);
+    const saleOf = (p: any): number | null => {
+      const o = offerBy.get(String(p.id));
+      const price = Number(p.price);
+      if (!o || !(price > 0)) return null;
+      const v = Number(o.discount_value) || 0;
+      const d = o.discount_type === "amount" ? v : (price * v) / 100;
+      return Math.max(0, Math.round((price - Math.min(d, price)) * 100) / 100);
+    };
     return (prods ?? []).map((p: any) => ({
       id: p.id,
       name: p.name,
       price: p.price ?? null,
+      sale_price: saleOf(p),
       currency: p.currency ?? null,
       variants: (vars ?? [])
         .filter((v: any) => v.product_id === p.id)
