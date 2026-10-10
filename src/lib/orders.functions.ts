@@ -385,6 +385,8 @@ export interface OrderCatalogProduct {
   id: string;
   name: string;
   price: number | null;
+  /** Price after the live per-piece product offer, null when none. */
+  sale_price: number | null;
   currency: string | null;
   variants: { color: string | null; size: string | null; stock: number | null }[];
 }
