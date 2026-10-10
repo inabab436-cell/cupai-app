@@ -65,7 +65,9 @@ function DashboardPage() {
   const badgeFor = (to: string) =>
     to === "/orders" ? newOrders : to === "/conversations" ? pendingChats : 0;
 
-  const orderCount = orders.data?.filter((order) => order.status !== "cancelled").length ?? 0;
+  const todayStart = new Date(); todayStart.setHours(0, 0, 0, 0);
+  const orderCount = orders.data?.filter((order) =>
+    order.status !== "cancelled" && new Date((order as any).created_at).getTime() >= todayStart.getTime()).length ?? 0;
 
   return (
     <div dir="rtl" className="hub hub-dashboard min-h-screen pb-24 lg:pb-0">
@@ -116,7 +118,7 @@ function DashboardPage() {
                 <Link to="/orders" className="dashboard-summary-card group">
                   <span className="grid h-10 w-10 place-items-center rounded-lg bg-dashboard-blue-soft text-dashboard-blue"><ShoppingBag className="h-5 w-5" /></span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-xs text-muted-foreground">إجمالي الطلبات</span>
+                    <span className="block text-xs text-muted-foreground">إجمالي الطلبات اليوم</span>
                     <span className="dashboard-number mt-1 block text-2xl font-bold">{orders.isLoading ? "—" : orderCount}</span>
                   </span>
                   <ArrowLeft className="h-4 w-4 text-muted-foreground transition-transform group-hover:-translate-x-1" />

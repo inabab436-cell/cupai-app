@@ -392,6 +392,14 @@ function OrdersPage() {
           >
             {t.label}
           </button>
+      {!open && (o.payment_status === "pending" || pending) && o.status !== "cancelled" && (
+        <div className="px-4 pb-3">
+          <Button size="sm" className="rounded-full" disabled={busy.pay} onClick={onPay}>
+            <BadgeCheck className="ml-1 h-3.5 w-3.5" />
+            {o.payment_status === "pending" ? "تأكيد الدفع" : "تأكيد دفع الإضافة"}
+          </Button>
+        </div>
+      )}
         ))}
       </div>
 
