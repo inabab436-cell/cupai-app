@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Move order payment action to the upper left, update payment-settings helper text, and show unread customer chat messages on the storefront icon.
+
 - [x] Show selected payment details and required amount in checkout; simplify receipt heading and replace manual-payment chat confirmation.
 
 - [x] Open onboarding immediately after merchant registration, including Google registration.
