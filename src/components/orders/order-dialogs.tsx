@@ -14,6 +14,7 @@ import {
 import {
   listOrderCatalog, createMerchantOrder, updateOrderDetails, editOrderItems, type OrderRow,
 } from "@/lib/orders.functions";
+import { listShippingRates } from "@/lib/content.functions";
 
 const fieldCls = "w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
 
