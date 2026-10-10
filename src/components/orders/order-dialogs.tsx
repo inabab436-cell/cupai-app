@@ -26,6 +26,7 @@ type Line = { product_id: string; variant: string; quantity: number };
 export function NewOrderDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const qc = useQueryClient();
   const cat = useQuery({ queryKey: ["order-catalog"], queryFn: () => listOrderCatalog(), enabled: open });
+  const zones = useQuery({ queryKey: ["shipping-rates"], queryFn: () => listShippingRates(), enabled: open });
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
