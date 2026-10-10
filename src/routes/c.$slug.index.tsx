@@ -154,16 +154,18 @@ function BrandPageInner({ slug }: { slug: string }) {
 
   return (
     <div dir={storeDir()} className="store min-h-screen">
-      {/* Announcement bar */}
-      <div className="overflow-hidden bg-primary py-2 text-primary-foreground">
-        <div className="store-marquee flex w-max gap-12 whitespace-nowrap">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <span key={i} className="store-label">
-              {onSale ? t("عروض لفترة محدودة · ") : ""}{t("شحن لكل المحافظات · الدفع بالطريقة التي تناسبك")}
-            </span>
-          ))}
+      {/* Announcement bar (offers only) */}
+      {onSale && (
+        <div className="overflow-hidden bg-primary py-2 text-primary-foreground">
+          <div className="store-marquee flex w-max gap-12 whitespace-nowrap">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <span key={i} className="store-label">
+                {t("عروض لفترة محدودة")}
+              </span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <StorefrontChatLink slug={slug} merchantId={store.merchantId} />
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
@@ -262,7 +264,7 @@ function BrandPageInner({ slug }: { slug: string }) {
       <section className="border-y border-border">
         <div className="mx-auto grid w-full max-w-7xl grid-cols-1 divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0 sm:divide-x-reverse">
           {[
-            { Icon: Truck, t: t("شحن سريع"), d: t("لكل المحافظات") },
+            { Icon: Truck, t: t("شحن سريع"), d: "" },
             { Icon: ShieldCheck, t: t("دفع آمن"), d: t("بالطريقة التي تناسبك") },
             { Icon: MessageSquare, t: t("خدمة العملاء"), d: t("نرد عليك في أسرع وقت") },
           ].map(({ Icon, t, d }) => (
@@ -270,7 +272,7 @@ function BrandPageInner({ slug }: { slug: string }) {
               <Icon className="h-6 w-6 shrink-0" strokeWidth={1.25} />
               <div>
                 <div className="store-label">{t}</div>
-                <div className="text-sm text-muted-foreground">{d}</div>
+                {d && <div className="text-sm text-muted-foreground">{d}</div>}
               </div>
             </div>
           ))}
@@ -1069,6 +1071,7 @@ function CartDrawer({
                           <p className="mt-1 whitespace-pre-wrap break-words font-medium" dir="auto">
                             <LinkifyText text={receipt.paymentDetails} />
                           </p>
+                          <p className="mt-1 text-xs text-muted-foreground">{t("هذا رقم التحويل الخاص بالمتجر، وليس رقم هاتفك.")}</p>
                         </div>
                       )}
                     </div>

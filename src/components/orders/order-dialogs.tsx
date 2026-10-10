@@ -14,6 +14,7 @@ import {
 import {
   listOrderCatalog, createMerchantOrder, updateOrderDetails, editOrderItems, type OrderRow,
 } from "@/lib/orders.functions";
+import { listShippingRates } from "@/lib/content.functions";
 
 const fieldCls = "w-full rounded-md border border-input bg-background px-3 py-2 text-sm";
 
@@ -25,6 +26,7 @@ type Line = { product_id: string; variant: string; quantity: number };
 export function NewOrderDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const qc = useQueryClient();
   const cat = useQuery({ queryKey: ["order-catalog"], queryFn: () => listOrderCatalog(), enabled: open });
+  const zones = useQuery({ queryKey: ["shipping-rates"], queryFn: () => listShippingRates(), enabled: open });
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
@@ -84,6 +86,30 @@ export function NewOrderDialog({ open, onOpenChange }: { open: boolean; onOpenCh
         </DialogHeader>
         <div className="space-y-3">
           <Input placeholder="اسم العميل" value={name} onChange={(e) => setName(e.target.value)} />
+          {(zones.data?.length ?? 0) > 0 && (
+            <select
+              className={fieldCls}
+              value=""
+              onChange={(e) => {
+                const z = zones.data?.find((r) => r.id === e.target.value);
+                if (!z) return;
+                const label = [z.country, z.region].filter(Boolean).join(" - ");
+                if (!label) return;
+                setAddress((prev) => {
+                  const p = prev.trim();
+                  if (!p) return label;
+                  return p.includes(label) ? p : `${label} - ${p}`;
+                });
+              }}
+            >
+              <option value="">اختر منطقة من مناطق الشحن ليُكتب تلقائيًا في العنوان</option>
+              {zones.data!.map((z) => (
+                <option key={z.id} value={z.id}>
+                  {[z.country, z.region].filter(Boolean).join(" / ") || "منطقة"}{z.price != null ? ` — شحن ${z.price} ${z.currency ?? ""}` : ""}
+                </option>
+              ))}
+            </select>
+          )}
           <Input placeholder="رقم الهاتف" dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} />
           <Textarea rows={2} placeholder="عنوان الشحن" value={address} onChange={(e) => setAddress(e.target.value)} />
 
