@@ -75,3 +75,15 @@ describe("product card offer plan", () => {
     expect(unitsForMinimum(2000, null)).toBe(1);
   });
 });
+
+describe("simple per-piece product offers", () => {
+  it("fixed amount is taken off each piece: 3 × (500 − 100) = 1200", () => {
+    const p = planOffer(offer({ discount_type: "amount", discount_value: 100, min_order_total: null, per_piece: true }), { unitPrice: 500, quantity: 3 })!;
+    expect(p.discountNow).toBe(300);
+    expect(p.totalNow).toBe(1200);
+  });
+  it("20% on 3 pieces of 500 = 1200", () => {
+    const p = planOffer(offer({ discount_value: 20, min_order_total: null, per_piece: true }), { unitPrice: 500, quantity: 3 })!;
+    expect(p.totalNow).toBe(1200);
+  });
+});
