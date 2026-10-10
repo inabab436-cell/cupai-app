@@ -53,6 +53,25 @@ export function partialAmountLabel(p: PaymentPolicyFields, currency = "جنيه"
   return `${fmtNum(p.partial_payment_value)} ${currency}`;
 }
 
+/** Display-only amount due; never changes order totals or payment state. */
+export function paymentAmountDue(p: PaymentPolicyFields | null, total: number): number | null {
+  if (!p || p.payment_kind === "on_delivery") return null;
+  const value = Math.max(0, Number(total) || 0);
+  if (p.allow_partial_payment && p.partial_payment_value > 0) {
+    return p.partial_payment_type === "amount"
+      ? Math.min(p.partial_payment_value, value)
+      : Math.round(value * p.partial_payment_value) / 100;
+  }
+  return value;
+}
+
+export function paymentRequirementLabel(p: PaymentPolicyFields | null): string | null {
+  if (!p || p.payment_kind === "on_delivery") return null;
+  return p.allow_partial_payment && p.partial_payment_value > 0
+    ? partialAmountLabel(p)
+    : "المبلغ كاملًا";
+}
+
 /** Short Arabic summary for the settings list. */
 export function paymentPolicySummary(p: PaymentPolicyFields): string {
   if (p.payment_kind === "on_delivery") return "الدفع عند الاستلام — العميل يدفع عند تسلّم الطلب، ولا يُعتبر الطلب مدفوعاً قبل ذلك.";

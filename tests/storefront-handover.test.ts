@@ -11,14 +11,13 @@ describe("buildHandoverChatMessage", () => {
     expect(buildHandoverChatMessage(null)).toBe(DEFAULT_MANUAL_HANDOVER_MESSAGE);
   });
 
-  it("keeps the merchant confirmation wording as a single short line", () => {
-    const msg = buildHandoverChatMessage("تمام،  تم تأكيد الاوردر.\nمن فضلك حوّل\tوابعت اللقطة.");
-    expect(msg).toBe("تمام، تم تأكيد الاوردر. من فضلك حوّل وابعت اللقطة.");
-    expect(msg).not.toContain("\n");
+  it("preserves separate payment details and order number lines", () => {
+    const message = "تم تسجيل طلبك\n\n01000000000\n\nرقم الطلب\nORD-1";
+    expect(buildHandoverChatMessage(message)).toBe(message);
   });
 
-  it("never lets a long template become a wall of order details", () => {
-    const msg = buildHandoverChatMessage("ا".repeat(2000));
-    expect(msg.length).toBe(400);
+  it("does not drop payment details or a trailing order number after 400 characters", () => {
+    const message = `${"ا".repeat(500)}\n01000000000\nORD-1`;
+    expect(buildHandoverChatMessage(message)).toBe(message);
   });
 });

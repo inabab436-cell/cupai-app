@@ -847,6 +847,7 @@ function CartDrawer({
     orderNumber: string; total: number; currency: string | null; message: string;
     requiresPayment: boolean; paymentMethod: string | null;
     paymentDetails: string | null; amountDue: number | null;
+    paymentRequirement: string | null;
     lines: Array<{ name: string; color: string | null; size: string | null; quantity: number; price: number | null; currency: string | null }>;
     shippingLabel: string | null; shippingPrice: number; subtotal: number;
     discount: number; offers: StorefrontAppliedOffer[];
@@ -928,6 +929,7 @@ function CartDrawer({
         paymentMethod: res.paymentMethod,
         paymentDetails: res.paymentDetails ?? null,
         amountDue: res.amountDue ?? null,
+        paymentRequirement: res.paymentRequirement ?? null,
         lines: cart.lines.map((l) => ({
           name: l.name, color: l.color ?? null, size: l.size ?? null,
           quantity: l.quantity, price: l.price, currency: l.currency,
@@ -1013,7 +1015,7 @@ function CartDrawer({
               {step === "shipping" && t("منطقة الشحن")}
               {step === "payment" && t("طريقة الدفع")}
               {step === "summary" && t("ملخص الأوردر")}
-              {step === "done" && (receipt?.requiresPayment ? t("بانتظار إتمام الدفع") : t("تم تأكيد الأوردر"))}
+              {step === "done" && t("تم تسجيل الأوردر")}
             </h3>
             <button onClick={onClose} className="rounded p-1 hover:bg-muted"><X className="h-4 w-4" /></button>
           </div>
@@ -1039,7 +1041,7 @@ function CartDrawer({
             <div className="space-y-3 text-sm">
               <div className="bg-primary p-4 text-primary-foreground">
                 <div className="store-display text-xl">
-                  {receipt.requiresPayment ? t("تم تسجيل الأوردر — فاضل إتمام الدفع") : t("تم إنشاء الأوردر بنجاح ✅")}
+                  {t("تم تسجيل الأوردر")}
                 </div>
                 <div className="mt-1 text-sm">{t("رقم الأوردر:")} <span className="font-mono">{receipt.orderNumber}</span></div>
                 <div className="mt-1 text-sm">{t("الإجمالي")}: {receipt.total} {receipt.currency ?? ""}</div>
@@ -1053,6 +1055,14 @@ function CartDrawer({
                   </p>
                   {(receipt.amountDue != null || receipt.paymentDetails) && (
                     <div className="space-y-2 rounded-lg border p-3">
+                      {receipt.paymentMethod && (
+                        <div className="flex justify-between gap-2">
+                          <span>{t("طريقة الدفع")}</span><span>{receipt.paymentMethod}</span>
+                        </div>
+                      )}
+                      {receipt.paymentRequirement && (
+                        <p className="text-xs text-muted-foreground">{t(receipt.paymentRequirement)}</p>
+                      )}
                       {receipt.amountDue != null && (
                         <div className="flex justify-between font-semibold">
                           <span>{t("المبلغ المطلوب الآن")}</span>

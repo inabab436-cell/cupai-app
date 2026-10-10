@@ -9,13 +9,13 @@
  *     and the order is linked to that conversation so the agent/merchant can
  *     read the FULL order details from the system.
  *
- * The customer-visible chat message contains ONLY the payment sentence — never
+ * The customer-visible chat message contains the payment instructions — never
  * the order lines, address or totals; those stay in the order data.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export const DEFAULT_MANUAL_HANDOVER_MESSAGE =
-  "تمام يا فندم، فاضل بس إتمام الدفع لتأكيد الأوردر.";
+  "تم تسجيل طلبك بنجاح";
 
 function newSessionToken(): string {
   const c: Crypto | undefined = typeof crypto !== "undefined" ? (crypto as Crypto) : undefined;
@@ -24,14 +24,12 @@ function newSessionToken(): string {
 }
 
 /**
- * The single short sentence the customer sees in the chat. Falls back to the
- * default wording, collapses whitespace and caps the length so a merchant
- * template can never turn into a wall of order details.
+ * Preserve the generated payment instructions, including line breaks, payment
+ * details and the order number. Do not truncate customer payment information.
  */
 export function buildHandoverChatMessage(confirmationMessage?: string | null): string {
-  const text = String(confirmationMessage ?? "").replace(/\s+/g, " ").trim();
-  const base = text.length > 0 ? text : DEFAULT_MANUAL_HANDOVER_MESSAGE;
-  return base.slice(0, 400);
+  const text = String(confirmationMessage ?? "").trim();
+  return text || DEFAULT_MANUAL_HANDOVER_MESSAGE;
 }
 
 export async function findOrCreateCustomerConversation(
@@ -98,7 +96,7 @@ export async function handoverForManualPayment(
   const conversationId = await findOrCreateCustomerConversation(admin, opts);
   if (!conversationId) return null;
 
-  // Only the payment sentence reaches the customer.
+  // Only the generated payment instructions reach the customer.
   try {
     await admin.from("messages").insert({
       conversation_id: conversationId,
