@@ -6,7 +6,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   ChevronDown, Truck, PackageCheck, Package, Settings2, Info, XCircle,
-  Trash2, BadgeCheck, Phone, MapPin, StickyNote, Search, Download, Pencil, Plus,
+  Trash2, BadgeCheck, Search, Download, Pencil, Plus,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -26,9 +26,10 @@ import {
 import { canStartFulfillmentForOrder } from "@/lib/order-status-gate";
 import {
   hasPendingAddition,
-  pendingItemsOf,
 } from "@/lib/order-pending-additions";
 import { NewOrderDialog, EditOrderDialog } from "@/components/orders/order-dialogs";
+import { OrderDetails } from "@/components/orders/order-details";
+import { orderPresentation } from "@/lib/order-presentation";
 
 
 export const Route = createFileRoute("/orders")({
@@ -61,8 +62,8 @@ function statusLabel(s: string): string {
 function statusClass(s: string): string {
   switch (s) {
     case "new": return "bg-accent text-accent-foreground";
-    case "prepared": return "bg-violet-500/10 text-violet-700";
-    case "shipped": return "bg-blue-500/10 text-blue-700";
+    case "prepared": return "bg-secondary text-secondary-foreground";
+    case "shipped": return "bg-accent text-accent-foreground";
     case "delivered": return "bg-primary text-primary-foreground";
     case "cancelled": return "bg-destructive/10 text-destructive";
     default: return "bg-muted text-muted-foreground";
@@ -239,24 +240,9 @@ async function exportOrdersToXlsx(orders: OrderRow[]) {
  * either an amount or a percentage of the products total.
  */
 function OrderValue({ order }: { order: OrderRow }) {
-  const currency =
-    (order.items.find((i) => (i.currency ?? "").trim())?.currency ?? "").trim();
-  const itemsTotal = order.items.reduce((sum, i) => {
-    const line =
-      i.line_total ?? (Number(i.unit_price ?? i.price ?? 0) * Number(i.quantity ?? 0));
-    const n = Number(line);
-    return Number.isFinite(n) ? sum + n : sum;
-  }, 0);
-  // The products actually on the order are the source of truth; a stored
-  // subtotal can be stale (e.g. after an amendment) and gave wrong percentages.
-  const subtotal = itemsTotal > 0 ? itemsTotal : Number(order.subtotal_price ?? 0) || 0;
-  const total = order.total_price != null ? Number(order.total_price) : null;
-  const discount = Math.min(subtotal > 0 ? subtotal : Infinity, Number(order.discount_amount ?? 0) || 0);
-
-  if (total == null && subtotal <= 0) return <span className="text-muted-foreground">—</span>;
-  const value = total ?? subtotal;
-  const rawPercent = discount > 0 && subtotal > 0 ? (discount / subtotal) * 100 : 0;
-  const percent = rawPercent > 0 ? Math.round(rawPercent * 10) / 10 : 0;
+  const { currency, total, discount } = orderPresentation(order);
+  if (total === null) return <span className="text-xs text-muted-foreground">الإجمالي غير مسجل</span>;
+  const value = total;
 
   const pendingTotal = Number(order.pending_total ?? 0) || 0;
   const pendingDiscount = Number(order.pending_discount ?? 0) || 0;
@@ -266,14 +252,13 @@ function OrderValue({ order }: { order: OrderRow }) {
       <div className="hub-display text-xl font-bold">
         {fmtMoney(value)} <span className="text-xs font-medium text-muted-foreground">{currency}</span>
       </div>
-      {discount > 0 && (
+      {discount !== null && discount > 0 && (
         <div className="text-[11px] font-medium text-primary">
           بعد خصم {fmtMoney(discount)} {currency}
-          {percent > 0 ? ` (${percent}%)` : ""}
         </div>
       )}
       {hasPendingAddition(order) && (
-        <div className="text-[11px] font-medium text-amber-700">
+        <div className="text-[11px] font-medium text-muted-foreground">
           + إضافة بانتظار الدفع: {fmtMoney(pendingTotal)} {currency}
           {pendingDiscount > 0 ? ` (بعد خصم ${fmtMoney(pendingDiscount)})` : ""}
         </div>
@@ -553,7 +538,7 @@ function OrderCard({
 }) {
   const pending = hasPendingAddition(o);
   return (
-    <HubCard className="overflow-hidden">
+    <HubCard className="overflow-hidden rounded-lg shadow-none">
       {(o.payment_status === "pending" || pending) && o.status !== "cancelled" && (
         <div className="flex justify-end px-4 pt-3" dir="rtl">
           <Button size="sm" className="rounded-full" disabled={busy.pay} onClick={onPay}>
@@ -562,7 +547,7 @@ function OrderCard({
           </Button>
         </div>
       )}
-      <button onClick={onToggle} className="block w-full p-4 text-start">
+      <Button variant="ghost" onClick={onToggle} aria-expanded={open} aria-label={`تفاصيل الطلب ${o.order_number ?? o.id.slice(0, 8)}`} className="block h-auto w-full whitespace-normal rounded-none p-4 text-start hover:bg-muted/30">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -570,129 +555,40 @@ function OrderCard({
               <span
                 className={`hub-chip ${
                   o.payment_status === "pending"
-                    ? "bg-amber-500/12 text-amber-700"
+                    ? "bg-muted text-muted-foreground"
                     : orderPaymentState(o) === "on_delivery"
-                      ? "bg-sky-500/12 text-sky-700"
+                      ? "bg-accent text-accent-foreground"
                       : "bg-primary/10 text-primary"
                 }`}
                 title={o.payment_method ?? ""}
               >
                 {ORDER_PAYMENT_STATE_LABEL_AR[orderPaymentState(o)]}
               </span>
-              {pending && (
-                <span className="hub-chip bg-amber-500/12 text-amber-700">إضافة بانتظار الدفع</span>
-              )}
+              {pending && <span className="hub-chip bg-muted text-muted-foreground">إضافة بانتظار الدفع</span>}
             </div>
-            <div className="mt-2 truncate text-[15px] font-bold">{o.customer_name ?? "بدون اسم"}</div>
-            <div className="mt-0.5 font-mono text-[11px] text-muted-foreground">
-              #{o.order_number ?? o.id.slice(0, 8)} · {fmtDate(o.created_at)}
+            <div className="mt-2 break-words text-[15px] font-bold">{o.customer_name?.trim() || "بدون اسم"}</div>
+            <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+              <span dir="ltr">#{o.order_number ?? o.id.slice(0, 8)}</span>
+              <span>{fmtDate(o.created_at)}</span>
             </div>
           </div>
           <div className="flex flex-col items-end gap-2">
             <OrderValue order={o} />
-            <ChevronDown
-              className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
-            />
+            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
           </div>
         </div>
-        <StatusRail status={o.status} />
-      </button>
+      </Button>
 
-      {pending && (
-        <div className="mx-4 mb-3 rounded-xl border border-amber-300/70 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
-          إضافة جديدة بانتظار الدفع: {fmtMoney(Number(o.pending_total ?? 0))}
-        </div>
-      )}
+      {open && <OrderDetails order={o} />}
 
-      {open && (
-        <div className="space-y-4 border-t border-border bg-secondary/50 p-4">
-          <div className="grid gap-2 text-[12px] sm:grid-cols-2">
-            <InfoRow icon={<Phone className="h-3.5 w-3.5" />} label="الهاتف">
-              <span dir="ltr" className="font-mono">{o.customer_phone ?? "—"}</span>
-            </InfoRow>
-            <InfoRow icon={<MapPin className="h-3.5 w-3.5" />} label="العنوان">
-              {o.customer_address ?? "—"}
-            </InfoRow>
-          </div>
-
-          <div>
-            <SectionLabel>تفاصيل المنتجات</SectionLabel>
-            {o.items.length === 0 ? (
-              <div className="rounded-xl border border-border bg-background p-4 text-center text-xs text-muted-foreground">
-                لا توجد منتجات.
-              </div>
-            ) : (
-              <ul className="space-y-2">
-                {o.items.map((it, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-border bg-background px-3 py-2 text-xs"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate font-semibold">{it.product_name ?? "—"}</span>
-                      <span className="block text-[11px] text-muted-foreground">
-                        {[it.color, it.size].filter(Boolean).join(" · ") || "—"}
-                      </span>
-                    </span>
-                    <span className="shrink-0 rounded-lg bg-accent px-2 py-1 text-[11px] font-bold text-accent-foreground">
-                      × {it.quantity ?? "—"}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {pending && (
-            <div>
-              <SectionLabel className="text-amber-700">إضافة بانتظار تأكيد الدفع</SectionLabel>
-              <ul className="space-y-2">
-                {pendingItemsOf(o).map((it, i) => (
-                  <li
-                    key={i}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-amber-300/70 bg-amber-50/60 px-3 py-2 text-xs text-amber-900"
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate font-semibold">{String(it.product_name ?? "—")}</span>
-                      <span className="block text-[11px]">
-                        {[it.color, it.size].filter(Boolean).map(String).join(" · ") || "—"}
-                      </span>
-                    </span>
-                    <span className="shrink-0 font-bold">× {String(it.quantity ?? "—")}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-2 text-[11px] text-amber-700">
-                قيمة الإضافة: {fmtMoney(Number(o.pending_total ?? 0))} — لا يُخصم مخزونها ولا تُحتسب مدفوعة قبل تأكيد الدفع.
-              </div>
-            </div>
-          )}
-
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div>
-              <SectionLabel>ملاحظات العميل</SectionLabel>
-              <div className="flex items-start gap-2 rounded-xl border border-border bg-background p-3 text-xs leading-relaxed whitespace-pre-wrap">
-                <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                {o.notes?.trim() ? o.notes : <span className="text-muted-foreground">لا توجد ملاحظات.</span>}
-              </div>
-            </div>
-            <div className="space-y-1 text-[11px] text-muted-foreground">
-              <div>تاريخ التجهيز: <span className="font-semibold text-foreground">{fmtDate(o.prepared_at)}</span></div>
-              <div>تاريخ الشحن: <span className="font-semibold text-foreground">{fmtDate(o.shipped_at)}</span></div>
-              <div>تاريخ التسليم: <span className="font-semibold text-foreground">{fmtDate(o.delivered_at)}</span></div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-wrap gap-2 border-t border-border p-3">
-        <Button size="sm" variant="outline" className="rounded-full" onClick={onEdit}>
+      <div className="grid grid-cols-3 gap-2 border-t border-border p-3 sm:flex sm:flex-wrap">
+        <Button size="sm" variant="outline" className="rounded-md" onClick={onEdit}>
           <Pencil className="ml-1 h-3.5 w-3.5" /> تعديل
         </Button>
         <Button
           size="sm"
           variant="outline"
-          className="rounded-full"
+          className="rounded-md"
           disabled={
             o.status === "prepared" || o.status === "shipped" ||
             o.status === "delivered" || o.status === "cancelled" || busy.status
@@ -704,7 +600,7 @@ function OrderCard({
         <Button
           size="sm"
           variant="outline"
-          className="rounded-full"
+          className="rounded-md"
           disabled={o.status === "shipped" || o.status === "delivered" || busy.status}
           onClick={() => onStatus("shipped")}
         >
@@ -713,7 +609,7 @@ function OrderCard({
         <Button
           size="sm"
           variant="outline"
-          className="rounded-full"
+          className="rounded-md"
           disabled={o.status === "delivered" || busy.status}
           onClick={() => onStatus("delivered")}
         >
@@ -722,7 +618,7 @@ function OrderCard({
         <Button
           size="sm"
           variant="outline"
-          className="rounded-full text-destructive hover:text-destructive"
+          className="rounded-md text-destructive hover:text-destructive"
           disabled={o.status === "cancelled" || busy.cancel}
           onClick={onCancel}
         >
@@ -733,25 +629,6 @@ function OrderCard({
   );
 }
 
-function SectionLabel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <div className={`mb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-function InfoRow({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-start gap-2 rounded-xl border border-border bg-background px-3 py-2">
-      <span className="mt-0.5 text-muted-foreground">{icon}</span>
-      <span className="min-w-0">
-        <span className="block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
-        <span className="block break-words">{children}</span>
-      </span>
-    </div>
-  );
-}
 
 function StatusMessagesEditor() {
   const qc = useQueryClient();
