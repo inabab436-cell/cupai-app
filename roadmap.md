@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Simplify merchant order details and show saved payment, shipping, and amount fields instead of historical summaries.
+
 - [x] Move order payment action to the upper left, update payment-settings helper text, and show unread customer chat messages on the storefront icon.
 
 - [x] Show selected payment details and required amount in checkout; simplify receipt heading and replace manual-payment chat confirmation.
