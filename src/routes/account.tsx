@@ -195,9 +195,6 @@ function AccountPage() {
             <button type="button" onClick={onLogout} className="flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-bold hover:bg-muted">
               <LogOut className="h-4 w-4" /> تسجيل الخروج
             </button>
-            <button type="button" disabled={busy} onClick={() => setConfirmOpen(true)} className="flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold text-destructive hover:bg-destructive/10 disabled:opacity-60">
-              <Trash2 className="h-4 w-4" /> حذف الحساب
-            </button>
           </div>
         </SurfaceCard>
       </div>
