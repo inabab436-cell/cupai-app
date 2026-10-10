@@ -83,6 +83,7 @@ export const EN: Record<string, string> = {
   "تم تأكيد الأوردر": "Order confirmed",
   "تم تسجيل الأوردر — فاضل إتمام الدفع": "Order received — payment pending",
   "تمت الإضافة للسلة ✓": "Added to cart ✓",
+  "تمت الإضافة": "Added",
   "تمت الإضافة بالفعل": "Already added",
   "تواصل معنا": "Contact us",
   "جارٍ إنشاء الأوردر…": "Placing order…",

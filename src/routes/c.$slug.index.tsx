@@ -4,6 +4,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { QtyInput } from "@/components/ui/qty-input";
 import { ShoppingBag, ShoppingCart, X, Send, Info, Truck, PhoneCall, ScrollText, MessageSquare, UserCircle2, Flame, Tag, ShieldCheck, Phone, ChevronLeft } from "lucide-react";
 import { bestOfferPlan, type OfferPlan } from "@/lib/product-offer-badge";
 import {
@@ -195,9 +196,9 @@ function BrandPageInner({ slug }: { slug: string }) {
             <button
               onClick={() => { void q.refetch(); setCartOpen(true); }}
               aria-label={t("السلة")}
-              className="relative grid h-10 w-10 place-items-center hover:bg-muted"
+              className="relative me-1 grid h-12 w-12 place-items-center rounded-full border border-border hover:bg-muted"
             >
-              <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
+              <ShoppingBag className="h-6 w-6" strokeWidth={1.5} />
               {cart.count > 0 && (
                 <span className="absolute left-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
                   {cart.count}
@@ -670,16 +671,8 @@ function ColorSwatch({ label, image, active, onClick, small }: { label: string; 
   );
 }
 
-function showAddedToast(name: string, image: string | null) {
-  toast.custom(() => (
-    <div dir={storeDir()} className="store flex w-[340px] items-center gap-3 border border-border bg-background p-3 text-foreground shadow-2xl">
-      {image ? <img src={image} alt="" className="h-14 w-11 shrink-0 object-cover" /> : <ShoppingBag className="h-6 w-6 shrink-0" strokeWidth={1.5} />}
-      <div className="min-w-0 flex-1">
-        <p className="store-label">{t("تمت الإضافة للسلة ✓")}</p>
-        <p className="truncate text-xs text-muted-foreground">{name}</p>
-      </div>
-    </div>
-  ), { duration: 2500 });
+function showAddedToast(_name: string, _image: string | null) {
+  toast.success(t("تمت الإضافة"), { duration: 1200 });
 }
 
 
@@ -1153,10 +1146,10 @@ function CartDrawer({
                       )}
                       <div className="text-xs text-muted-foreground">{l.price ?? "—"} {l.currency ?? ""}</div>
                     </div>
-                    <Input
-                      type="number" min={1} value={l.quantity}
-                      onChange={(e) => cart.setQty({ productId: l.productId, color: l.color, size: l.size }, Number(e.target.value) || 1)}
-                      className="w-16"
+                    <QtyInput
+                      value={l.quantity}
+                      onChange={(n) => cart.setQty({ productId: l.productId, color: l.color, size: l.size }, n)}
+                      className="w-16 text-center"
                     />
                     <button onClick={() => cart.remove({ productId: l.productId, color: l.color, size: l.size })} className="rounded p-1 text-muted-foreground hover:text-destructive">
                       <X className="h-4 w-4" />
