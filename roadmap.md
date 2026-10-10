@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Show selected payment details and required amount in checkout; simplify receipt heading and replace manual-payment chat confirmation.
+- [x] Show selected payment details and required amount in checkout; simplify receipt heading and replace manual-payment chat confirmation.
 
 - [x] Open onboarding immediately after merchant registration, including Google registration.
 - [x] Improve the Google continuation screen design
