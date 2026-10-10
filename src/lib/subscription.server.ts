@@ -17,7 +17,8 @@ export async function getStoreAccess(admin: any, userId: string | null | undefin
     const endsAt = typeof meta.subscription_ends_at === "string" ? Date.parse(meta.subscription_ends_at) : NaN;
     return Number.isFinite(endsAt) && endsAt <= Date.now() ? "expired" : "open";
   } catch {
-    return "open";
+    // Fail closed: if the subscription can't be verified, only the owner sees the store.
+    return "unsubscribed";
   }
 }
 
