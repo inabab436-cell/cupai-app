@@ -554,6 +554,14 @@ function OrderCard({
   const pending = hasPendingAddition(o);
   return (
     <HubCard className="overflow-hidden">
+      {(o.payment_status === "pending" || pending) && o.status !== "cancelled" && (
+        <div className="flex justify-end px-4 pt-3" dir="rtl">
+          <Button size="sm" className="rounded-full" disabled={busy.pay} onClick={onPay}>
+            <BadgeCheck className="ml-1 h-3.5 w-3.5" />
+            {o.payment_status === "pending" ? "تأكيد الدفع" : "تأكيد دفع الإضافة"}
+          </Button>
+        </div>
+      )}
       <button onClick={onToggle} className="block w-full p-4 text-start">
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
           <div className="min-w-0">
@@ -589,14 +597,6 @@ function OrderCard({
         </div>
         <StatusRail status={o.status} />
       </button>
-      {!open && (o.payment_status === "pending" || pending) && o.status !== "cancelled" && (
-        <div className="px-4 pb-3">
-          <Button size="sm" className="rounded-full" disabled={busy.pay} onClick={onPay}>
-            <BadgeCheck className="ml-1 h-3.5 w-3.5" />
-            {o.payment_status === "pending" ? "تأكيد الدفع" : "تأكيد دفع الإضافة"}
-          </Button>
-        </div>
-      )}
 
       {pending && (
         <div className="mx-4 mb-3 rounded-xl border border-amber-300/70 bg-amber-50 px-3 py-2 text-[11px] text-amber-900">
@@ -689,12 +689,6 @@ function OrderCard({
         <Button size="sm" variant="outline" className="rounded-full" onClick={onEdit}>
           <Pencil className="ml-1 h-3.5 w-3.5" /> تعديل
         </Button>
-        {(o.payment_status === "pending" || pending) && o.status !== "cancelled" && (
-          <Button size="sm" className="rounded-full" disabled={busy.pay} onClick={onPay}>
-            <BadgeCheck className="ml-1 h-3.5 w-3.5" />
-            {o.payment_status === "pending" ? "تأكيد الدفع" : "تأكيد دفع الإضافة"}
-          </Button>
-        )}
         <Button
           size="sm"
           variant="outline"

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { getStorefront, type StorefrontProduct } from "@/lib/storefront.functions";
 import { getChatConfig } from "@/lib/chat-config.functions";
+import { markChatRead } from "@/lib/customer-chat-unread";
 import { uploadChatImage } from "@/lib/chat-upload.functions";
 import {
   LIVE_LOCATION_DURATION_MS,
@@ -243,6 +244,16 @@ export function CustomerChat({
     }, 4000);
     return () => clearInterval(t);
   }, [callEdge, conversationId, loggedIn]);
+
+  useEffect(() => {
+    if (!conversationId) return;
+    const markVisibleMessages = () => {
+      if (document.visibilityState === "visible") markChatRead(slug, conversationId, messages);
+    };
+    markVisibleMessages();
+    document.addEventListener("visibilitychange", markVisibleMessages);
+    return () => document.removeEventListener("visibilitychange", markVisibleMessages);
+  }, [slug, conversationId, messages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

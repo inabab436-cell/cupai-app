@@ -16,3 +16,4 @@
 - Merchant authentication returns a setup-aware destination consumed directly by sign-in screens, so new accounts reach onboarding before the dashboard.
 - `src/server.ts` imports the TanStack server entry statically (not via dynamic import), because the lazy import made the bundler emit a circular chunk that crashed every published page with "__exportAll is not a function".
 - Payment instructions use shared display-only policy helpers and authoritative saved order totals; preserve multiline handover messages without truncation so payment details and order numbers stay intact.
+- Storefront unread chat badges reuse the existing visitor-scoped fetch endpoint and a conversation-scoped local read cursor; mark messages read only while chat is visible, without changing message storage or payment behavior.

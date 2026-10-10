@@ -368,6 +368,7 @@ function PaymentMethodsPage() {
                       )}
                     </div>
                   )}
+                  <p className="text-xs text-muted-foreground">يتم عرض المبلغ المطلوب من العميل لإتمام الطلب، وفقًا للإعدادات المحددة.</p>
                 </div>
 
                 <div className="space-y-2">
@@ -380,7 +381,6 @@ function PaymentMethodsPage() {
                     onChange={(e) => set("details", e.target.value)}
                     placeholder={suggestion?.placeholder || "مثال: رقم فودافون كاش: 01204664848 أو رابط الدفع"}
                   />
-                  <p className="text-xs text-muted-foreground">تظهر للعميل بعد اختياره هذه الطريقة لإكمال الدفع.</p>
                 </div>
               </>
             )}
