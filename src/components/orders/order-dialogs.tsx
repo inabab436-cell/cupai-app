@@ -5,6 +5,7 @@ import { Plus, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { QtyInput } from "@/components/ui/qty-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -110,8 +111,7 @@ export function NewOrderDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                     </select>
                   )}
                   <div className="flex items-center gap-2">
-                    <Input type="number" min={1} className="w-24" value={l.quantity}
-                      onChange={(e) => setLine(i, { quantity: Math.max(1, Number(e.target.value) || 1) })} />
+                    <QtyInput className="w-24" value={l.quantity} onChange={(n) => setLine(i, { quantity: n })} />
                     <span className="text-xs text-muted-foreground">الكمية</span>
                     {lines.length > 1 && (
                       <Button type="button" size="icon" variant="ghost" className="ms-auto"
@@ -290,8 +290,7 @@ export function EditOrderDialog({ order, onClose }: { order: OrderRow | null; on
                     </select>
                   )}
                   <div className="flex items-center gap-2">
-                    <Input type="number" min={1} className="w-24" value={l.quantity}
-                      onChange={(e) => setLine(i, { quantity: Math.max(1, Number(e.target.value) || 1) })} />
+                    <QtyInput className="w-24" value={l.quantity} onChange={(n) => setLine(i, { quantity: n })} />
                     <span className="text-xs text-muted-foreground">الكمية</span>
                     {lines.length > 1 && (
                       <Button type="button" size="icon" variant="ghost" className="ms-auto"
