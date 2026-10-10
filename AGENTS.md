@@ -15,3 +15,4 @@
 - Site identity displays only merchant-provided logos, without a platform-logo fallback, to avoid reintroducing removed AI artwork.
 - Merchant authentication returns a setup-aware destination consumed directly by sign-in screens, so new accounts reach onboarding before the dashboard.
 - `src/server.ts` imports the TanStack server entry statically (not via dynamic import), because the lazy import made the bundler emit a circular chunk that crashed every published page with "__exportAll is not a function".
+- Payment instructions use shared display-only policy helpers and authoritative saved order totals; preserve multiline handover messages without truncation so payment details and order numbers stay intact.

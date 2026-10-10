@@ -11,6 +11,7 @@
  */
 import {
   normalizePaymentPolicy,
+  paymentAmountDue,
   paymentPolicyForAgent,
   type PaymentPolicyFields,
 } from "@/lib/payment-policy";
@@ -467,8 +468,21 @@ export async function loadEnabledPaymentMethods(
  */
 export function buildPaymentConfirmationMessage(
   method: PaymentMethodRow | null,
-  opts: { deliveryEta?: string | null; orderNumber?: string | null },
+  opts: { deliveryEta?: string | null; orderNumber?: string | null; total?: number },
 ): string {
+  if (method?.behavior === "manual" && method.payment_kind !== "on_delivery") {
+    const amount = opts.total == null ? null : paymentAmountDue(method, opts.total);
+    const amountText = amount == null ? "المبلغ المحدد للطلب" : `${Number(amount.toFixed(2))} جنيه`;
+    const paymentDetails = method.detail_value.trim() || "لم يحدد المتجر بيانات الدفع.";
+    return [
+      "تم تسجيل طلبك بنجاح",
+      `ولإتمام الطلب يُرجى تحويل مبلغ ${amountText} عبر ${method.name} باستخدام بيانات الدفع التالية:`,
+      paymentDetails,
+      "بعد التحويل، يُرجى إرسال صورة الإيصال هنا وسيتم مراجعة الدفع وتأكيد طلبك",
+      "رقم الطلب",
+      opts.orderNumber?.trim() ?? "",
+    ].join("\n\n").trim();
+  }
   const details = [
     method && method.detail_type !== "none" && method.detail_value
       ? `${method.name}: ${method.detail_value}`

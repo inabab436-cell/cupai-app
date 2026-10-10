@@ -11,6 +11,7 @@ import {
   validateEgyptianPhone,
 } from "./order-input-validation";
 import { createServerFn } from "@tanstack/react-start";
+import { paymentAmountDue, paymentRequirementLabel } from "./payment-policy";
 
 
 import type { ProductOffer } from "./product-offer-badge";
@@ -310,6 +311,7 @@ export type StorefrontOrderResult =
       paymentDetails: string | null;
       /** Amount the customer must pay now for an online method. */
       amountDue: number | null;
+      paymentRequirement: string | null;
       confirmationMessage: string;
       /** true when the chosen method is manual → payment still pending. */
       requiresPayment: boolean;
@@ -752,6 +754,7 @@ export const createStorefrontOrder = createServerFn({ method: "POST" })
     const confirmationMessage = buildPaymentConfirmationMessage(chosenMethod, {
       deliveryEta: shippingRow?.eta ?? null,
       orderNumber,
+      total: totals.total,
     });
 
     // Manual payment method (Vodafone Cash / InstaPay / any method the merchant
@@ -786,15 +789,8 @@ export const createStorefrontOrder = createServerFn({ method: "POST" })
         chosenMethod && chosenMethod.payment_kind !== "on_delivery" && chosenMethod.detail_value
           ? chosenMethod.detail_value
           : null,
-      amountDue: (() => {
-        if (!chosenMethod || chosenMethod.payment_kind === "on_delivery") return null;
-        const t = Number(totals.total) || 0;
-        if (chosenMethod.allow_partial_payment && chosenMethod.partial_payment_value > 0) {
-          if (chosenMethod.partial_payment_type === "amount") return Math.min(chosenMethod.partial_payment_value, t);
-          return Math.round(t * chosenMethod.partial_payment_value) / 100;
-        }
-        return t;
-      })(),
+      amountDue: paymentAmountDue(chosenMethod, totals.total),
+      paymentRequirement: paymentRequirementLabel(chosenMethod),
       confirmationMessage,
       requiresPayment,
       conversationId,

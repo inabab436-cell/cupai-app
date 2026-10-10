@@ -3796,6 +3796,7 @@ export const Route = createFileRoute("/api/chat-ai")({
             const confirmationMessage = buildPaymentConfirmationMessage(chosenMethod, {
               deliveryEta,
               orderNumber,
+              total: grandTotal,
             });
 
             const { paymentPolicyForAgent } = await import("@/lib/payment-policy");
