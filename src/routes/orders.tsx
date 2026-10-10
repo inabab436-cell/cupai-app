@@ -564,7 +564,22 @@ function OrderCard({
               >
                 {ORDER_PAYMENT_STATE_LABEL_AR[orderPaymentState(o)]}
               </span>
-              {open && <OrderDetails order={o} />}
+              {pending && <span className="hub-chip bg-muted text-muted-foreground">إضافة بانتظار الدفع</span>}
+            </div>
+            <div className="mt-2 break-words text-[15px] font-bold">{o.customer_name?.trim() || "بدون اسم"}</div>
+            <div className="mt-1 flex flex-wrap gap-x-2 gap-y-1 text-[11px] text-muted-foreground">
+              <span dir="ltr">#{o.order_number ?? o.id.slice(0, 8)}</span>
+              <span>{fmtDate(o.created_at)}</span>
+            </div>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <OrderValue order={o} />
+            <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+          </div>
+        </div>
+      </Button>
+
+      {open && <OrderDetails order={o} />}
 
       <div className="grid grid-cols-3 gap-2 border-t border-border p-3 sm:flex sm:flex-wrap">
         <Button size="sm" variant="outline" className="rounded-md" onClick={onEdit}>
