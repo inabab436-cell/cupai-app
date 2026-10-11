@@ -1,7 +1,5 @@
 # Roadmap
 
-- [x] Add an animated homepage brand-store showcase with three real product photographs, prices, sizes, and simulated buying.
-
 - [ ] Simplify merchant order details and show saved payment, shipping, and amount fields instead of historical summaries.
 
 - [x] Move order payment action to the upper left, update payment-settings helper text, and show unread customer chat messages on the storefront icon.
