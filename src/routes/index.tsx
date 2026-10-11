@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CupaiLogo, CupaiMark } from "@/components/cupai-logo";
 import { getSessionInfo } from "@/lib/auth.functions";
+import { StorefrontShowcase } from "@/components/homepage/storefront-showcase";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -64,7 +65,7 @@ function Index() {
       </header>
 
       <main>
-        <section className="mx-auto max-w-6xl px-4 pb-14 pt-14 text-center sm:px-6 sm:pt-20">
+        <section className="mx-auto max-w-6xl px-4 pb-10 pt-9 text-center sm:px-6 sm:pt-12">
           <span className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-semibold text-primary shadow-card">
             <ShoppingBag className="h-3.5 w-3.5" /> متجرك الإلكتروني في دقائق
           </span>
@@ -82,6 +83,7 @@ function Index() {
               لدي حساب
             </Button>
           </div>
+          <StorefrontShowcase />
         </section>
 
         <section className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
