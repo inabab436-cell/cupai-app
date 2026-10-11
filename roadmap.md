@@ -1,6 +1,6 @@
 # Roadmap
 
-- [ ] Add an animated homepage brand-store showcase with three real product photographs, prices, sizes, and simulated buying.
+- [x] Add an animated homepage brand-store showcase with three real product photographs, prices, sizes, and simulated buying.
 
 - [ ] Simplify merchant order details and show saved payment, shipping, and amount fields instead of historical summaries.
 
