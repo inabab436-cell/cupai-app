@@ -1,6 +1,7 @@
 # Roadmap
 
 - [x] Add an animated homepage brand-store showcase with three real product photographs, prices, sizes, and simulated buying.
+- [ ] Match the homepage showcase to the actual merchant storefront and replace footwear with clothing.
 
 - [ ] Simplify merchant order details and show saved payment, shipping, and amount fields instead of historical summaries.
 
