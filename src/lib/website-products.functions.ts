@@ -134,7 +134,7 @@ export const listWebsiteProducts = createServerFn({ method: "GET" }).handler(
     const storagePaths = (im.data ?? [])
       .map((i: any) => String(i.url ?? ""))
       .filter((u: string) => u && !/^https?:/i.test(u) && !/^data:/i.test(u));
-    const signedByPath = await createSignedUrlsBatch(storagePaths, 60 * 60);
+    const signedByPath = await createSignedUrlsBatch(storagePaths, 60 * 60 * 24 * 7);
     for (const i of im.data ?? []) {
       const p = byId.get(String(i.product_id));
       if (!p) continue;
@@ -519,7 +519,7 @@ export const uploadProductImage = createServerFn({ method: "POST" })
     }).select("id, url, position, color_id, size_id").single();
     if (error || !row) throw new Error(error?.message ?? "Insert image failed.");
 
-    const signed = await createSignedUrl(path, 60 * 60);
+    const signed = await createSignedUrl(path, 60 * 60 * 24 * 7);
 
     return {
       id: String(row.id), url: signed, storage_path: path,

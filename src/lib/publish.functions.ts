@@ -152,7 +152,7 @@ export const resolveProductImageUrls = createServerFn({ method: "POST" })
     for (const pid of Object.keys(byProduct)) {
       const resolved = await Promise.all(byProduct[pid].map(async (u) => {
         if (/^https?:/i.test(u) || /^data:/i.test(u)) return u;
-        try { return await createSignedUrl(u, 60 * 60); } catch { return null; }
+        try { return await createSignedUrl(u, 60 * 60 * 24 * 7); } catch { return null; }
       }));
       byProduct[pid] = Array.from(new Set(resolved.filter((u): u is string => !!u)));
     }
