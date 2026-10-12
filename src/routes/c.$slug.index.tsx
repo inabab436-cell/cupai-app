@@ -149,11 +149,10 @@ function BrandPageInner({ slug }: { slug: string }) {
   const theme = THEMES[(store.themeKey ?? "").toLowerCase()] ?? THEMES.espresso;
   const categories = Array.from(new Set(store.products.map((p) => p.category).filter((c): c is string => !!c)));
   const shown = category ? store.products.filter((p) => p.category === category) : store.products;
-  const heroImg = store.products.find((p) => p.images[0])?.images[0] ?? null;
   const onSale = store.products.some((p) => (p.offers ?? []).length > 0);
 
   return (
-    <div dir={storeDir()} className="store min-h-screen">
+    <div dir={storeDir()} className="store merchant-browse min-h-screen">
       {/* Announcement bar (offers only) */}
       {onSale && (
         <div className="overflow-hidden bg-primary py-2 text-primary-foreground">
@@ -169,17 +168,10 @@ function BrandPageInner({ slug }: { slug: string }) {
 
       <StorefrontChatLink slug={slug} merchantId={store.merchantId} />
       <header className="sticky top-0 z-30 border-b border-border bg-background/90 backdrop-blur-md">
-        <div className="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3 px-4 py-3 sm:px-8">
-          <nav className="hidden items-center gap-6 sm:flex">
-            <button onClick={() => setCategory(null)} className="store-label hover:underline underline-offset-8">{t("الكل")}</button>
-            {categories.slice(0, 3).map((c) => (
-              <button key={c} onClick={() => setCategory(c)} className="store-label hover:underline underline-offset-8">{c}</button>
-            ))}
-          </nav>
-          <div className="sm:hidden" />
-          <Link to="/c/$slug" params={{ slug }} className="flex items-center justify-center gap-2">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-4 sm:px-7">
+          <Link to="/c/$slug" params={{ slug }} className="flex min-w-0 max-w-full items-center gap-2">
             {store.logoUrl && <img src={store.logoUrl} alt="" className="h-8 w-8 object-cover" />}
-            <span className="store-display truncate text-3xl sm:text-4xl">{brandName}</span>
+            <span className="merchant-brand break-words text-2xl font-extrabold sm:text-3xl">{brandName}</span>
           </Link>
           <div className="flex items-center justify-end gap-1">
             <StoreLangToggle />
@@ -189,7 +181,7 @@ function BrandPageInner({ slug }: { slug: string }) {
             >
               {t("تتبع طلبي")}
             </Link>
-            <button
+            <Button variant="ghost" size="icon"
               onClick={() => { void q.refetch(); setCartOpen(true); }}
               aria-label={t("السلة")}
               className="relative me-1 grid h-12 w-12 place-items-center rounded-full border border-border hover:bg-muted"
@@ -200,49 +192,29 @@ function BrandPageInner({ slug }: { slug: string }) {
                   {cart.count}
                 </span>
               )}
-            </button>
+            </Button>
           </div>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative isolate overflow-hidden bg-secondary">
-        <div className="mx-auto grid min-h-[70vh] w-full max-w-7xl items-end px-4 pb-12 pt-24 sm:px-8">
-          {heroImg && (
-            <img src={heroImg} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover" />
-          )}
-          {heroImg && <div className="absolute inset-0 -z-10 bg-gradient-to-t from-foreground/70 via-foreground/10 to-transparent" />}
-          <div className={heroImg ? "text-primary-foreground" : ""}>
-            <p className="store-label">{t("المجموعة الجديدة")}</p>
-            <h2 className="store-display mt-3 max-w-4xl text-7xl sm:text-9xl">{brandName}</h2>
-            {store.brandDescription && (
-              <p className="mt-4 max-w-xl text-base opacity-90">{store.brandDescription}</p>
-            )}
-            <a
-              href="#shop"
-              className={`store-label mt-8 inline-flex h-12 items-center px-10 transition ${heroImg ? "bg-background text-foreground hover:bg-background/85" : "bg-primary text-primary-foreground hover:bg-primary/85"}`}
-            >
-              {t("تسوّق الآن")}
-            </a>
+      <main id="shop" className="mx-auto w-full max-w-6xl scroll-mt-24 px-4 pb-12 pt-7 sm:px-7 sm:pt-9">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="merchant-brand text-xl font-bold sm:text-2xl">{category ?? t("كل المنتجات")}</h1>
+            {store.brandDescription && <p className="mt-2 max-w-xl whitespace-pre-line text-sm leading-relaxed text-muted-foreground">{store.brandDescription}</p>}
           </div>
-        </div>
-      </section>
-
-      <main id="shop" className="mx-auto w-full max-w-7xl scroll-mt-20 px-4 py-14 sm:px-8">
-        <div className="mb-8 flex flex-wrap items-end justify-between gap-4 border-b border-border pb-4">
-          <h2 className="store-display text-5xl sm:text-6xl">{category ?? t("كل المنتجات")}</h2>
-          <span className="store-label text-muted-foreground">{shown.length} {t("قطعة")}</span>
+          <span className="text-xs text-muted-foreground">{shown.length} {t("قطعة")}</span>
         </div>
         {categories.length > 0 && (
           <div className="-mx-4 mb-8 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
             {[null, ...categories].map((c) => (
-              <button
+               <Button variant="outline"
                 key={c ?? "all"}
                 onClick={() => setCategory(c)}
                 className={`store-label shrink-0 border px-4 py-2 transition ${category === c ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary"}`}
               >
                 {c ?? t("الكل")}
-              </button>
+               </Button>
             ))}
           </div>
         )}
@@ -252,7 +224,7 @@ function BrandPageInner({ slug }: { slug: string }) {
             <p className="mt-2 text-sm text-muted-foreground">{t("لا توجد منتجات منشورة بعد.")}</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-3 gap-y-10 sm:gap-x-5 lg:grid-cols-4">
+          <div className="merchant-product-track">
             {shown.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
@@ -487,8 +459,8 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
   const img2 = gallery[1];
   const sale = Boolean(plan?.qualifies && plan.discountNow > 0);
   return (
-    <article className="group flex flex-col">
-      <div className="relative aspect-[3/4] w-full cursor-pointer overflow-hidden bg-secondary" onClick={() => setOpen(true)}>
+    <article className="merchant-product group flex min-w-0 flex-col">
+      <div className="merchant-product-image relative w-full cursor-pointer overflow-hidden bg-secondary" onClick={() => setOpen(true)}>
         {img ? (
           <>
             <img src={img} alt={product.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]" onError={(e) => ((e.target as HTMLImageElement).style.display = "none")} />
@@ -516,13 +488,13 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
         )}
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2.5 pt-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-2 pt-3">
         {product.category && <span className="store-label truncate text-[10px] text-muted-foreground">{product.category}</span>}
-        <button type="button" onClick={() => setOpen(true)} className="line-clamp-2 min-h-[2.5rem] text-right text-sm font-medium leading-5 hover:underline underline-offset-4">{product.name}</button>
+        <Button variant="link" type="button" onClick={() => setOpen(true)} className="h-auto min-h-6 justify-start whitespace-normal p-0 text-start text-sm font-semibold leading-6 sm:text-base">{product.name}</Button>
         {unitPrice != null && (
           <div className="flex flex-wrap items-baseline gap-x-2 text-sm">
             <span className={`font-semibold ${sale ? "text-destructive" : ""}`}>
-              {sale ? plan!.unitPriceNow : unitPrice} {cur}
+              {sale && plan ? plan.unitPriceNow : unitPrice} {cur}
             </span>
             {sale && <span className="text-xs text-muted-foreground line-through">{unitPrice} {cur}</span>}
           </div>
@@ -536,16 +508,18 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
           </div>
         )}
         {sizesForColor.length > 0 && (
-          <div className="grid grid-cols-4 gap-1">
+          <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t("المقاس")}>
+            <span className="me-1 text-[11px] text-muted-foreground">{t("المقاس")}</span>
             {sizesForColor.map((s) => (
-              <button
+              <Button variant="outline" size="sm"
                 key={s}
                 type="button"
                 onClick={() => { setSize(s); setQty(1); }}
-                className={`h-8 min-w-0 truncate border px-1 text-[11px] font-semibold transition ${effectiveSize === s ? "border-primary bg-primary text-primary-foreground" : "border-border hover:border-primary"}`}
+                aria-pressed={effectiveSize === s}
+                className={`h-8 min-w-8 rounded-none px-2 text-[11px] font-semibold transition ${effectiveSize === s ? "border-primary bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground" : "border-border hover:border-primary"}`}
               >
                 {s}
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -561,14 +535,15 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
 
         {!outOfStock && (
           <div className="mt-auto pt-1">
-            <button
+            <Button
               type="button"
               disabled={alreadyInCart}
               onClick={addToCart}
-              className="store-label h-10 w-full bg-primary text-primary-foreground transition hover:bg-primary/85 disabled:bg-muted disabled:text-muted-foreground"
+              className="h-10 w-full gap-2 rounded-none text-xs transition disabled:bg-muted disabled:text-muted-foreground"
             >
               {alreadyInCart ? t("في السلة ✓") : t("شراء الآن")}
-            </button>
+               <ShoppingBag className="h-3.5 w-3.5" />
+            </Button>
           </div>
         )}
       </div>
@@ -599,7 +574,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
                 <h2 className="text-xl font-semibold leading-snug sm:text-2xl">{product.name}</h2>
                 {unitPrice != null && (
                   <div className="flex items-baseline gap-2">
-                    <span className={`text-lg font-semibold ${sale ? "text-destructive" : ""}`}>{sale ? plan!.unitPriceNow : unitPrice} {cur}</span>
+                    <span className={`text-lg font-semibold ${sale ? "text-destructive" : ""}`}>{sale && plan ? plan.unitPriceNow : unitPrice} {cur}</span>
                     {sale && <span className="text-sm text-muted-foreground line-through">{unitPrice} {cur}</span>}
                   </div>
                 )}
