@@ -8,20 +8,21 @@ export const UPLOAD_BUCKET = "cupai-uploads";
 // In-memory cache of freshly signed URLs (per worker isolate). A signed URL is
 // valid for its whole TTL, so reusing it for a bounded window is safe and
 // removes one storage round-trip per image on every page load.
-const signedUrlCache = new Map<string, { url: string; expiresAt: number }>();
+const signedUrlCache = new Map<string, { url: string; expiresAt: number; reuseUntil: number }>();
 /** Stop reusing a signed URL this long before it actually expires. */
-const SIGN_CACHE_MARGIN_MS = 5 * 60 * 1000;
+const SIGN_CACHE_MARGIN_MS = 0;
 
 function cacheSigned(path: string, url: string, expiresIn: number) {
   signedUrlCache.set(path, {
     url,
     expiresAt: Date.now() + expiresIn * 1000 - SIGN_CACHE_MARGIN_MS,
+    reuseUntil: Date.now() + (expiresIn * 1000) / 2,
   });
 }
 
 function cachedSigned(path: string): string | null {
   const hit = signedUrlCache.get(path);
-  if (hit && hit.expiresAt - 60_000 > Date.now()) return hit.url;
+  if (hit && hit.reuseUntil > Date.now()) return hit.url;
   if (hit) signedUrlCache.delete(path);
   return null;
 }

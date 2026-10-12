@@ -149,7 +149,7 @@ export const getStorefront = createServerFn({ method: "GET" })
         if (typeof u === "string" && u && !/^https?:/i.test(u) && !/^data:/i.test(u)) storagePaths.add(u);
       }
     }
-    const signedByPath = await createSignedUrlsBatch([...storagePaths], 60 * 60);
+    const signedByPath = await createSignedUrlsBatch([...storagePaths], 60 * 60 * 24 * 7);
     const sign = (u: string): string | null =>
       /^https?:/i.test(u) || /^data:/i.test(u) ? u : signedByPath.get(u) ?? null;
 
