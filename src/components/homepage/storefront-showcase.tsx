@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, LockKeyhole, MousePointer2, Pause, Play, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import tshirt from "@/assets/brand-tshirt.jpg.asset.json";
-import jeans from "@/assets/brand-jeans.jpg.asset.json";
-import sneakers from "@/assets/brand-sneakers.jpg.asset.json";
+import tshirt from "@/assets/brand-tshirt.jpg";
+import jeans from "@/assets/brand-jeans.jpg";
+import sneakers from "@/assets/brand-sneakers.jpg";
 
 const PRODUCTS = [
-  { name: "تيشيرت قطن كلاسيك", category: "ESSENTIALS", price: 450, image: tshirt.url, alt: "تيشيرت أبيض قطني حقيقي", sizes: ["S", "M", "L", "XL"] },
-  { name: "جينز أزرق", category: "EVERYDAY DENIM", price: 850, image: jeans.url, alt: "بنطلون جينز أزرق حقيقي", sizes: ["30", "32", "34", "36"] },
-  { name: "سنيكرز يومي", category: "STREET EDIT", price: 1200, image: sneakers.url, alt: "حذاء رياضي حقيقي باللون البرتقالي", sizes: ["40", "41", "42", "43"] },
+  { name: "تيشيرت قطن كلاسيك", category: "ESSENTIALS", price: 450, image: tshirt, alt: "تيشيرت أبيض قطني حقيقي", sizes: ["S", "M", "L", "XL"] },
+  { name: "جينز أزرق", category: "EVERYDAY DENIM", price: 850, image: jeans, alt: "بنطلون جينز أزرق حقيقي", sizes: ["30", "32", "34", "36"] },
+  { name: "سنيكرز يومي", category: "STREET EDIT", price: 1200, image: sneakers, alt: "حذاء رياضي حقيقي باللون البرتقالي", sizes: ["40", "41", "42", "43"] },
 ];
 
 export function StorefrontShowcase() {

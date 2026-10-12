@@ -802,6 +802,15 @@
 .showcase-product-image { aspect-ratio: 1.25; }
 .showcase-product-image img { transition: transform 700ms ease; }
 .showcase-product:hover img { transform: scale(1.035); }
+.merchant-browse .merchant-brand, .merchant-browse .merchant-product { font-family: "Cairo", sans-serif; letter-spacing: 0; }
+.merchant-product-track { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px 20px; }
+.merchant-product-image { aspect-ratio: 1.25; }
+.merchant-product-track > article { min-width: 0; }
+@media (max-width: 639px) {
+  .merchant-product-track { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 82%; gap: 14px; margin-inline: -16px; padding: 0 16px 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: thin; }
+  .merchant-product { scroll-snap-align: center; }
+  .merchant-product-image { aspect-ratio: 1.3; }
+}
 .showcase-cursor { position: absolute; top: 0; left: 0; z-index: 5; opacity: 0; pointer-events: none; transition: transform 650ms cubic-bezier(.25,.8,.25,1), opacity 180ms ease; }
 .showcase-cursor.is-visible { opacity: 1; }
 .showcase-cursor svg { transition: scale 160ms ease; }
