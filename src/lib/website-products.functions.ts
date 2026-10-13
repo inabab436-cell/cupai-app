@@ -129,12 +129,15 @@ export const listWebsiteProducts = createServerFn({ method: "GET" }).handler(
         hex: (c.hex as string | null) ?? null, position: Number(c.position ?? 0),
       });
     }
-    // Sign every storage image with ONE batch request instead of one request
-    // per image. Same URLs, just much faster on big catalogs.
-    const storagePaths = (im.data ?? [])
-      .map((i: any) => String(i.url ?? ""))
-      .filter((u: string) => u && !/^https?:/i.test(u) && !/^data:/i.test(u));
-    const signedByPath = await createSignedUrlsBatch(storagePaths, 60 * 60 * 24 * 7);
+    // Saved photos get a permanent address that never expires (the server
+    // route signs a fresh link on each request).
+    void createSignedUrl; void createSignedUrlsBatch;
+    const { permanentProductImageUrl } = await import("@/lib/product-image-url");
+    const signedByPath = new Map<string, string>();
+    for (const i of im.data ?? []) {
+      const u = String((i as any).url ?? "");
+      if (u && !/^https?:/i.test(u) && !/^data:/i.test(u)) signedByPath.set(u, permanentProductImageUrl(u));
+    }
     for (const i of im.data ?? []) {
       const p = byId.get(String(i.product_id));
       if (!p) continue;
@@ -519,7 +522,9 @@ export const uploadProductImage = createServerFn({ method: "POST" })
     }).select("id, url, position, color_id, size_id").single();
     if (error || !row) throw new Error(error?.message ?? "Insert image failed.");
 
-    const signed = await createSignedUrl(path, 60 * 60 * 24 * 7);
+    void createSignedUrl;
+    const { permanentProductImageUrl } = await import("@/lib/product-image-url");
+    const signed = permanentProductImageUrl(path);
 
     return {
       id: String(row.id), url: signed, storage_path: path,
