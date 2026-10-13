@@ -29,6 +29,7 @@ import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as CSlugRouteImport } from './routes/c.$slug'
 import { Route as ChatSlugRouteImport } from './routes/chat.$slug'
 import { Route as SettingsPaymentMethodsRouteImport } from './routes/settings.payment-methods'
+import { Route as ApiPublicProductImageRouteImport } from './routes/api/public/product-image'
 import { Route as CSlugIndexRouteImport } from './routes/c.$slug.index'
 import { Route as CSlugAccountRouteImport } from './routes/c.$slug.account'
 import { Route as CSlugTrackRouteImport } from './routes/c.$slug.track'
@@ -133,6 +134,11 @@ const SettingsPaymentMethodsRoute = SettingsPaymentMethodsRouteImport.update({
   path: '/settings/payment-methods',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicProductImageRoute = ApiPublicProductImageRouteImport.update({
+  id: '/api/public/product-image',
+  path: '/api/public/product-image',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CSlugIndexRoute = CSlugIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/c/$slug': typeof CSlugRouteWithChildren
   '/chat/$slug': typeof ChatSlugRoute
   '/settings/payment-methods': typeof SettingsPaymentMethodsRoute
+  '/api/public/product-image': typeof ApiPublicProductImageRoute
   '/c/$slug/account': typeof CSlugAccountRoute
   '/c/$slug/track': typeof CSlugTrackRoute
   '/c/$slug/': typeof CSlugIndexRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/chat/$slug': typeof ChatSlugRoute
   '/settings/payment-methods': typeof SettingsPaymentMethodsRoute
+  '/api/public/product-image': typeof ApiPublicProductImageRoute
   '/c/$slug/account': typeof CSlugAccountRoute
   '/c/$slug/track': typeof CSlugTrackRoute
   '/c/$slug': typeof CSlugIndexRoute
@@ -220,6 +228,7 @@ export interface FileRoutesById {
   '/c/$slug': typeof CSlugRouteWithChildren
   '/chat/$slug': typeof ChatSlugRoute
   '/settings/payment-methods': typeof SettingsPaymentMethodsRoute
+  '/api/public/product-image': typeof ApiPublicProductImageRoute
   '/c/$slug/account': typeof CSlugAccountRoute
   '/c/$slug/track': typeof CSlugTrackRoute
   '/c/$slug/': typeof CSlugIndexRoute
@@ -247,6 +256,7 @@ export interface FileRouteTypes {
     | '/c/$slug'
     | '/chat/$slug'
     | '/settings/payment-methods'
+    | '/api/public/product-image'
     | '/c/$slug/account'
     | '/c/$slug/track'
     | '/c/$slug/'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/chat/$slug'
     | '/settings/payment-methods'
+    | '/api/public/product-image'
     | '/c/$slug/account'
     | '/c/$slug/track'
     | '/c/$slug'
@@ -296,6 +307,7 @@ export interface FileRouteTypes {
     | '/c/$slug'
     | '/chat/$slug'
     | '/settings/payment-methods'
+    | '/api/public/product-image'
     | '/c/$slug/account'
     | '/c/$slug/track'
     | '/c/$slug/'
@@ -322,6 +334,7 @@ export interface RootRouteChildren {
   CSlugRoute: typeof CSlugRouteWithChildren
   ChatSlugRoute: typeof ChatSlugRoute
   SettingsPaymentMethodsRoute: typeof SettingsPaymentMethodsRoute
+  ApiPublicProductImageRoute: typeof ApiPublicProductImageRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -466,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsPaymentMethodsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/product-image': {
+      id: '/api/public/product-image'
+      path: '/api/public/product-image'
+      fullPath: '/api/public/product-image'
+      preLoaderRoute: typeof ApiPublicProductImageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/c/$slug/': {
       id: '/c/$slug/'
       path: '/'
@@ -525,6 +545,7 @@ const rootRouteChildren: RootRouteChildren = {
   CSlugRoute: CSlugRouteWithChildren,
   ChatSlugRoute: ChatSlugRoute,
   SettingsPaymentMethodsRoute: SettingsPaymentMethodsRoute,
+  ApiPublicProductImageRoute: ApiPublicProductImageRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
