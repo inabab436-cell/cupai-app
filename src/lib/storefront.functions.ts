@@ -149,7 +149,19 @@ export const getStorefront = createServerFn({ method: "GET" })
         if (typeof u === "string" && u && !/^https?:/i.test(u) && !/^data:/i.test(u)) storagePaths.add(u);
       }
     }
-    const signedByPath = await createSignedUrlsBatch([...storagePaths], 60 * 60 * 24 * 7);
+    // Photos saved in product_images get a permanent address that never
+    // expires; only legacy products.images paths are still signed directly.
+    const { permanentProductImageUrl } = await import("@/lib/product-image-url");
+    const savedPhotoPaths = new Set<string>();
+    for (const r of imgR.data ?? []) {
+      const u = String((r as any).url ?? "");
+      if (storagePaths.has(u)) savedPhotoPaths.add(u);
+    }
+    const legacyPaths = [...storagePaths].filter((u) => !savedPhotoPaths.has(u));
+    const signedByPath = legacyPaths.length
+      ? await createSignedUrlsBatch(legacyPaths, 60 * 60 * 24 * 7)
+      : new Map<string, string>();
+    for (const u of savedPhotoPaths) signedByPath.set(u, permanentProductImageUrl(u));
     const sign = (u: string): string | null =>
       /^https?:/i.test(u) || /^data:/i.test(u) ? u : signedByPath.get(u) ?? null;
 

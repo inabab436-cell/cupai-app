@@ -20,3 +20,4 @@
 - Storefront unread chat badges reuse the existing visitor-scoped fetch endpoint and a conversation-scoped local read cursor; mark messages read only while chat is visible, without changing message storage or payment behavior.
 - Keep the public homepage storefront showcase isolated and client-side with its own sample products and cart state; it must never create real orders or modify merchant inventory.
 - Bundle homepage demonstration photographs as imported source assets rather than platform asset pointers so independent deployments serve them; keep merchant browsing styles scoped to `.merchant-browse` without changing cart or pricing logic.
+- Saved product photos are served via the permanent `/api/public/product-image?p=<path>` route (re-signs on each request, only for paths in `product_images`), because expiring signed links made photos vanish from the merchant site.
