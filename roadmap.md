@@ -1,5 +1,7 @@
 # Roadmap
 
+- [x] Add a visible team-assisted product uploading request with phone, details, and availability before and after registration; submission and private saved read-back verified (admin-session UI check unavailable without admin credentials).
+
 - [x] Reorganize the homepage with a clear selling journey and explicit monthly Egyptian-pound pricing.
 
 - [x] Bundle homepage product photographs for portable deployments and adopt its product-browsing design on the merchant storefront without changing purchasing behavior.

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CupaiLogo } from "@/components/cupai-logo";
 import { getSessionInfo } from "@/lib/auth.functions";
 import { StorefrontShowcase } from "@/components/homepage/storefront-showcase";
+import { TeamUploadService } from "@/components/team-upload-service";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -77,6 +78,8 @@ function Index() {
           </div>
           <StorefrontShowcase />
         </section>
+
+        <TeamUploadService />
 
         <section id="selling" className="scroll-mt-20 border-y border-border bg-card">
           <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 sm:py-16">
