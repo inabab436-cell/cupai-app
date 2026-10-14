@@ -13,7 +13,9 @@ import {
   adminLogout, adminStatus, createMerchant, deleteMerchant,
   getPaymentReceiptUrl, impersonateMerchant, listMerchants, reviewPaymentReceipt,
   updateMerchant, type AdminMerchant,
+  listTeamUploadRequests,
 } from "@/lib/admin.functions";
+import type { TeamUploadRequest } from "@/lib/team-upload-request";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -44,6 +46,14 @@ function AdminPage() {
 }
 
 function Console({ onOut }: { onOut: () => void }) {
+  const listUploadRequests = useServerFn(listTeamUploadRequests);
+  const [uploadRequests, setUploadRequests] = useState<TeamUploadRequest[]>([]);
+  const [uploadError, setUploadError] = useState("");
+  const loadUploadRequests = useCallback(() => {
+    setUploadError("");
+    listUploadRequests().then(setUploadRequests).catch(() => setUploadError("تعذّر عرض طلبات رفع المنتجات."));
+  }, [listUploadRequests]);
+  useEffect(loadUploadRequests, [loadUploadRequests]);
   const list = useServerFn(listMerchants);
   const logout = useServerFn(adminLogout);
   const update = useServerFn(updateMerchant);
@@ -79,6 +89,21 @@ function Console({ onOut }: { onOut: () => void }) {
         </Button>
       </header>
       <main className="mx-auto max-w-5xl space-y-4 p-4">
+        <section className="border-b border-border pb-5">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="font-bold">طلبات رفع المنتجات بواسطة الفريق</h2>
+            <Button size="sm" variant="outline" onClick={loadUploadRequests}>تحديث</Button>
+          </div>
+          <p className="mb-3 text-xs text-muted-foreground">أحدث 100 طلب تواصل؛ تُحدَّد التكلفة مع صاحب الطلب قبل بدء العمل.</p>
+          {uploadError && <p role="alert" className="text-sm text-destructive">{uploadError}</p>}
+          <div className="divide-y divide-border">
+            {uploadRequests.map((request) => <div key={`${request.createdAt}-${request.phone}`} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
+              <a href={`tel:${encodeURIComponent(request.phone)}`} dir="ltr" className="font-semibold text-primary underline underline-offset-4">{request.phone}</a>
+              <span className="text-xs text-muted-foreground">{fmt(request.createdAt)}</span>
+            </div>)}
+          </div>
+          {!uploadError && uploadRequests.length === 0 && <p className="text-sm text-muted-foreground">لا توجد طلبات تواصل بعد.</p>}
+        </section>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Stat label="كل التجار" value={rows.length} />
           <Stat label="مشتركون" value={subs} />

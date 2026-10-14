@@ -4,6 +4,7 @@ import { clearSession, getSession, updateSession } from "@tanstack/react-start/s
  * sign in. Every handler re-checks the admin session server-side.
  */
 import { createServerFn } from "@tanstack/react-start";
+import { savedTeamUploadRequestSchema, TEAM_UPLOAD_REQUEST_FOLDER, type TeamUploadRequest } from "@/lib/team-upload-request";
 
 export const ADMIN_EMAIL = "maiapdalmotalib@gmail.com";
 
@@ -91,6 +92,23 @@ export const adminLogin = createServerFn({ method: "POST" })
 export const adminLogout = createServerFn({ method: "POST" }).handler(async () => {
   await clearSession(await adminSessionConfig());
   return { ok: true };
+});
+
+export const listTeamUploadRequests = createServerFn({ method: "GET" }).handler(async (): Promise<TeamUploadRequest[]> => {
+  await requireAdmin();
+  const sb = await admin();
+  const { UPLOAD_BUCKET } = await import("@/lib/storage.server");
+  const { data: files, error } = await sb.storage.from(UPLOAD_BUCKET).list(TEAM_UPLOAD_REQUEST_FOLDER, {
+    limit: 100, sortBy: { column: "created_at", order: "desc" },
+  });
+  if (error) throw new Error("تعذّر عرض طلبات رفع المنتجات.");
+  const rows = await Promise.all((files ?? []).filter((file) => file.name.endsWith(".json")).map(async (file) => {
+    const { data, error: downloadError } = await sb.storage.from(UPLOAD_BUCKET).download(`${TEAM_UPLOAD_REQUEST_FOLDER}/${file.name}`);
+    if (downloadError || !data) throw new Error("تعذّر قراءة طلبات رفع المنتجات.");
+    const parsed = savedTeamUploadRequestSchema.safeParse(JSON.parse(await data.text()));
+    return parsed.success ? parsed.data : null;
+  }));
+  return rows.filter((row): row is TeamUploadRequest => row !== null).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 });
 
 export const listMerchants = createServerFn({ method: "GET" }).handler(
