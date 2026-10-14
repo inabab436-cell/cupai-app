@@ -21,3 +21,4 @@
 - Keep the public homepage storefront showcase isolated and client-side with its own sample products and cart state; it must never create real orders or modify merchant inventory.
 - Bundle homepage demonstration photographs as imported source assets rather than platform asset pointers so independent deployments serve them; keep merchant browsing styles scoped to `.merchant-browse` without changing cart or pricing logic.
 - Saved product photos are served via the permanent `/api/public/product-image?p=<path>` route (re-signs on each request, only for paths in `product_images`), because expiring signed links made photos vanish from the merchant site.
+- Team-upload contact requests use validated private JSON objects in the existing upload bucket with atomic daily deduplication and admin-cookie-protected reads, so the existing external deployment works without schema changes; never expose these objects through product-image URLs.
