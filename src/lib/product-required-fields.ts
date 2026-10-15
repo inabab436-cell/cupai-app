@@ -1,7 +1,7 @@
 /**
  * Mandatory basic product fields.
  *
- * The merchant may not save a product without its material, its price and at
+ * The merchant may not save a product without its price and at
  * least one colour row carrying a quantity: a product missing any of these
  * reaches the customer as an incomplete answer ("مش عارف الخامة/السعر") or as
  * a contradictory availability state.
@@ -9,7 +9,6 @@
 
 export function requireMaterial(raw: string): string {
   const value = String(raw ?? "").trim();
-  if (value === "") throw new Error("اكتب خامة المنتج — الخانة إجبارية.");
   return value;
 }
 
@@ -40,7 +39,6 @@ export function basicFieldsFilled(input: {
   const price = Number(String(input.price).trim());
   return Boolean(
     input.name.trim() &&
-      input.material.trim() &&
       String(input.price).trim() !== "" &&
       Number.isFinite(price) &&
       price > 0 &&
@@ -67,7 +65,6 @@ export function missingRequiredFields(input: {
 }): Set<string> {
   const out = new Set<string>();
   if (!input.name.trim()) out.add("name");
-  if (!input.material.trim()) out.add("material");
   const p = Number(String(input.price).trim());
   if (String(input.price).trim() === "" || !Number.isFinite(p) || p <= 0) out.add("price");
   if (input.rows.length === 0) out.add("rows");

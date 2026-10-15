@@ -304,7 +304,7 @@ export const upsertWebsiteProduct = createServerFn({ method: "POST" })
         : undefined,
       imageColorAssignments: Array.isArray(d.imageColorAssignments)
         ? d.imageColorAssignments
-            .filter((a) => a?.imageId && a?.colorLabel?.trim())
+            .filter((a) => a?.imageId && typeof a.colorLabel === "string")
             .map((a) => ({ imageId: String(a.imageId), colorLabel: a.colorLabel.trim() }))
         : [],
     };
@@ -411,11 +411,11 @@ export const upsertWebsiteProduct = createServerFn({ method: "POST" })
 
     // Move already-saved images to the colour selected in the editor.
     for (const a of data.imageColorAssignments) {
-      const cid = colorIdByLabel.get(a.colorLabel.toLowerCase());
-      if (!cid) continue;
+      const cid = a.colorLabel ? colorIdByLabel.get(a.colorLabel.toLowerCase()) : null;
+      if (a.colorLabel && !cid) continue;
       await admin.from("product_images")
-        .update({ color_id: cid, size_id: null })
-        .eq("id", a.imageId).eq("product_id", productId!).eq("user_id", userId);
+        .update({ color_id: cid ?? null, size_id: null })
+        .eq("id", a.imageId).eq("product_id", productId).eq("user_id", userId);
     }
 
 
