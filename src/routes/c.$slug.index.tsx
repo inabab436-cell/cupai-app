@@ -28,6 +28,7 @@ import { getStorefront, createStorefrontOrder, checkStorefrontStock, quoteStoref
 import { saveCustomerDraft, clearCustomerDraft } from "@/lib/customer-orders.functions";
 import { THEMES } from "@/components/website/identity-section";
 import { t, storeDir, useStoreLang, StoreLangToggle } from "@/lib/store-i18n";
+import { productPhotoGroups, productDescriptionForColor } from "@/lib/product-media";
 
 export const Route = createFileRoute("/c/$slug/")({
   head: ({ params }) => {
@@ -423,8 +424,8 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
   const maxQty = selectedStock == null ? 99 : Math.max(selectedStock, 0);
   const clampedQty = Math.min(Math.max(qty, 1), Math.max(maxQty, 1));
 
-  const colorImgs = (color && product.colorImages?.[color]) || [];
-  const gallery = Array.from(new Set([...colorImgs, ...product.images]));
+  const photoGroups = productPhotoGroups(product.images, product.colorImages, color);
+  const gallery = photoGroups.gallery;
   const img = gallery[0];
   const [open, setOpen] = useState(false);
   const [activeImg, setActiveImg] = useState<string | null>(null);
@@ -456,17 +457,14 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
     });
     showAddedToast(product.name, img ?? null);
   };
-  const img2 = gallery[1];
+  const displayedDescription = productDescriptionForColor(product.description, color);
   const sale = Boolean(plan?.qualifies && plan.discountNow > 0);
   return (
     <article className="merchant-product group flex min-w-0 flex-col">
       <div className="merchant-product-image relative w-full cursor-pointer overflow-hidden bg-secondary" onClick={() => setOpen(true)}>
         {img ? (
           <>
-            <img src={img} alt={product.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.04]" onError={(e) => ((e.target as HTMLImageElement).style.display = "none")} />
-            {img2 && (
-              <img src={img2} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-0 transition duration-700 group-hover:opacity-100" />
-            )}
+            <img src={shownImg} alt={product.name} loading="lazy" className="absolute inset-0 h-full w-full object-contain" />
           </>
         ) : (
           <div className="grid h-full place-items-center">
@@ -488,6 +486,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
         )}
       </div>
 
+      <PhotoThumbnails groups={photoGroups} color={color} active={shownImg} onPick={setActiveImg} />
       <div className="flex min-w-0 flex-1 flex-col gap-2 pt-3">
         {product.category && <span className="store-label truncate text-[10px] text-muted-foreground">{product.category}</span>}
         <Button variant="link" type="button" onClick={() => setOpen(true)} className="h-auto min-h-6 justify-start whitespace-normal p-0 text-start text-sm font-semibold leading-6 sm:text-base">{product.name}</Button>
@@ -507,6 +506,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
             ))}
           </div>
         )}
+        {displayedDescription && <p className="line-clamp-3 text-xs leading-6 text-muted-foreground">{displayedDescription}</p>}
         {sizesForColor.length > 0 && (
           <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label={t("المقاس")}>
             <span className="me-1 text-[11px] text-muted-foreground">{t("المقاس")}</span>
@@ -549,7 +549,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
       </div>
       {open && (
         <div className="store fixed inset-0 z-50 flex bg-foreground/40 backdrop-blur-sm" dir={storeDir()} onClick={() => setOpen(false)}>
-          <div className="mr-auto flex h-full w-full max-w-lg flex-col overflow-y-auto bg-background shadow-2xl animate-in slide-in-from-left duration-300" onClick={(e) => e.stopPropagation()}>
+          <div role="dialog" aria-modal="true" aria-label={product.name} className="merchant-browse mr-auto flex h-full w-full max-w-lg flex-col overflow-y-auto bg-background shadow-2xl animate-in slide-in-from-left duration-300" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between border-b px-5 py-4">
               <span className="store-label">{t("تفاصيل المنتج")}</span>
               <button onClick={() => setOpen(false)} aria-label={t("إغلاق")} className="rounded p-1 hover:bg-muted"><X className="h-4 w-4" /></button>
@@ -559,15 +559,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
                 <div className="grid h-full place-items-center"><ShoppingBag className="h-10 w-10 text-muted-foreground" strokeWidth={1} /></div>
               )}
             </div>
-            {gallery.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto px-5 pt-3">
-                {gallery.map((g) => (
-                  <button key={g} type="button" onClick={() => setActiveImg(g)} className={`h-16 w-16 shrink-0 overflow-hidden border-2 transition ${shownImg === g ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"}`}>
-                    <img src={g} alt="" className="h-full w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
+            <div className="px-5 pt-3"><PhotoThumbnails groups={photoGroups} color={color} active={shownImg} onPick={setActiveImg} /></div>
             <div className="flex flex-col gap-5 px-5 pb-8 pt-5">
               <div className="flex flex-col gap-2 border-b border-border pb-5">
                 {product.category && <span className="store-label text-[11px] text-muted-foreground">{product.category}</span>}
@@ -579,7 +571,7 @@ function ProductCard({ product }: { product: StorefrontData["products"][number] 
                   </div>
                 )}
               </div>
-              {product.description && <p className="whitespace-pre-line text-sm leading-7 text-muted-foreground"><LinkifyText text={product.description} /></p>}
+              {displayedDescription && <p className="whitespace-pre-line text-sm leading-7 text-muted-foreground"><LinkifyText text={displayedDescription} /></p>}
               {availableColors.length > 0 && (
                 <div>
                   <p className="store-label mb-2">{t("اللون:")} <span className="text-muted-foreground">{color}</span></p>
@@ -640,6 +632,21 @@ function ColorSwatch({ label, image, active, onClick, small }: { label: string; 
       <img src={image} alt={label} className="h-full w-full object-cover" />
     </button>
   );
+}
+
+function PhotoThumbnails({ groups, color, active, onPick }: { groups: ReturnType<typeof productPhotoGroups>; color: string | null; active: string | undefined; onPick: (url: string) => void }) {
+  return <div className="min-w-0 space-y-2 pt-2">
+    {[{ label: color ? `صور اللون: ${color}` : "صور اللون", images: groups.selected }, { label: "صور المنتج", images: groups.general }].map((group) => group.images.length > 0 && (
+      <div key={group.label} className="min-w-0">
+        <p className="mb-1 text-[10px] text-muted-foreground">{group.label}</p>
+        <div className="flex gap-2 overflow-x-auto pb-1" role="group" aria-label={group.label}>
+          {group.images.map((url, i) => <Button key={url} variant="outline" type="button" aria-label={`${group.label} — صورة ${i + 1}`} aria-pressed={active === url} onClick={() => onPick(url)} className={`h-14 w-14 shrink-0 overflow-hidden rounded-md p-0 ${active === url ? "border-primary ring-1 ring-primary" : "border-border"}`}>
+            <img src={url} alt="" loading="lazy" className="h-full w-full object-cover" />
+          </Button>)}
+        </div>
+      </div>
+    ))}
+  </div>;
 }
 
 function showAddedToast(_name: string, _image: string | null) {
