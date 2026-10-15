@@ -1,5 +1,7 @@
 # Roadmap
 
+- [ ] Add mobile product galleries with separate general/color photos, optional photo colors and material, numeric sizes, and one automatic Arabic product description reused across colors.
+
 - [x] Add a visible team-assisted product uploading request with phone, details, and availability before and after registration; submission and private saved read-back verified (admin-session UI check unavailable without admin credentials).
 
 - [x] Reorganize the homepage with a clear selling journey and explicit monthly Egyptian-pound pricing.

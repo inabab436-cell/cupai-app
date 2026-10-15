@@ -9,7 +9,9 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-- Product image uploads are manual-only: never auto-analyze images or auto-fill product fields, because merchants assign colours themselves.
+- Product uploads automatically generate only one editable customer description; color associations and other fields remain manual so merchants retain control.
+- Product galleries separate unlinked photos from the selected color's photos using a browser-safe helper; description templates substitute a color placeholder without separate AI calls.
+- Draft product descriptions use an authenticated streaming server route before saving through existing product CRUD, avoiding schema changes and preserving portable deployments.
 - Keep dashboard-specific visual tokens scoped under `.hub-dashboard` so the wider merchant hub retains its existing theme.
 - Platform admin console lives at /admin with its own encrypted cookie; every admin server fn re-checks it, because route guards don't protect RPC endpoints.
 - Site identity displays only merchant-provided logos, without a platform-logo fallback, to avoid reintroducing removed AI artwork.
